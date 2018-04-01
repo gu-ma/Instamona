@@ -27,9 +27,9 @@ def main(args):
  
     # Define variables 
     config_path = 'yolo/config.json'
-    weights_path = 'yolo/full_yolo_mona_01.h5'
+    weights_path = 'yolo/full_yolo_mona_03.h5'
     tag = 'monalisaselfie'
-    test_run = True
+    test_run = False
 
     # Login
     api = login(args)
@@ -77,7 +77,7 @@ def main(args):
                 print('%s %s %s \n%s posted on Instagram' % (d.id, d.username, caption, fp))
                 if not test_run:
                     post_photos(api, img_str, (w,h), caption)
-                    sleep(5)
+                    sleep(10)
 
     # Save the runtime
     save_last_runtime(time())

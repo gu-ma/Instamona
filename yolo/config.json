@@ -2,7 +2,7 @@
     "model" : {
         "architecture":         "Full Yolo",
         "input_size":           416,
-        "anchors":              [1.35,2.26, 2.32,4.91, 3.66,8.93, 5.58,7.07, 8.03,10.34],
+        "anchors":              [1.48,2.15, 2.41,3.76, 3.50,8.79, 5.42,7.44, 8.04,10.04],
         "max_box_per_image":    10,        
         "labels":               ["mona"]
     },
@@ -14,16 +14,16 @@
         "train_times":          20,
         "pretrained_weights":   "weights/full_yolo_raccoon.h5",
         "batch_size":           6,
-        "learning_rate":        1e-4,
+        "learning_rate":        1e-3,
         "nb_epochs":            50,
-        "warmup_epochs":        0,
+        "warmup_epochs":        3,
 
         "object_scale":         5.0 ,
         "no_object_scale":      1.0,
         "coord_scale":          1.0,
         "class_scale":          1.0,
 
-        "saved_weights_name":   "weights/full_yolo_mona_01.h5",
+        "saved_weights_name":   "weights/full_yolo_mona_03.h5",
         "debug":                true
     },
 
