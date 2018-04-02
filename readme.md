@@ -2,7 +2,11 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 [![Twitter](https://img.shields.io/twitter/url/https/github.com/webslides/webslides.svg?style=social)](https://twitter.com/g_massol)
 
-Object detection on Instagram using Keras and Yolo.
+Object detection on Instagram using Keras and Yolo. 
+
+```python main.py -u "ig_usernamea" -p "ig_password" -settings "instagram/credentials.json" -f yyyy-mm-dd -t yyyy-mm-dd```
+
+NB: the function to search time interval does not work properly, sometimes there are unsorted dates in the list returned by ```Instagram Private API```
 
 > ![Mona Lova](https://raw.githubusercontent.com/gu-ma/Instamona/master/images/example.jpg)<br>
 > <a href="https://www.instagram.com/p/BhDIvrrFp7e/" target="_blank">A post shared by Mona Lova (@m.o.n.a.l.o.v.a)</a> on Apr 1, 2018 at 6:06pm PDT

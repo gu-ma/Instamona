@@ -32,13 +32,13 @@ def main(args):
  
     # Define variables 
     config_path = 'yolo/config.json'
-    weights_path = 'yolo/full_yolo_mona_05.h5'
+    weights_path = 'yolo/full_yolo_mona_03.h5'
     tag = 'monalisaselfie'
     test_run = True
 
     # Login
     print('\n--------------------')
-    print('[IG - LOGIN] %s %s' % (args.username, args.password))
+    print('[IG - LOGIN] \nusr:%s \npwd:%s' % (args.username, args.password))
     print('--------------------')
     api = login(args)
 
@@ -58,7 +58,7 @@ def main(args):
 
     # Get new posts from IG
     print('\n--------------------')
-    print("[IG - GET POSTS] #%s from %s to %s" % (tag, from_date.strftime("%Y-%m-%d"), to_date.strftime("%Y-%m-%d")))
+    print("[IG - GET POSTS] \n#%s \nfrom %s to %s" % (tag, from_date.strftime("%Y-%m-%d"), to_date.strftime("%Y-%m-%d")))
     print('--------------------')
     posts_data = [extract_post_data(post) for post in get_new_posts(api, from_date, to_date, tag)]
     # Parse and save new images

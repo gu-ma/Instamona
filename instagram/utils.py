@@ -64,12 +64,13 @@ def get_new_posts(api, from_date, to_date, tag):
         for post in posts:
             # retrieve post data
             media_type, date, username, img_url, id = extract_post_data(post)
-            # if the post is more recent than the last time we checked
+            # if the post is more within the dates
             if (img_url and date > from_date and date < to_date):
                 new_posts.append(post)
                 # print("%s - %s - %s \n%s" % (id, date, username, img_url))
-            # else break
-            elif date < from_date:
+            # else if it's older than the from date
+            # This doesn't work properly <--
+            if date < from_date:
                 loop = False
 
         next_max_id = results.get('next_max_id')
