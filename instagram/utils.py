@@ -49,7 +49,7 @@ def extract_post_data(post):
     Post = namedtuple('Post', ['media_type', 'date', 'username', 'img_url', 'id'])
     return Post(mt, dt, usr, url, id)
 
-def get_new_posts(api, last_runtime, tag):
+def get_new_posts(api, from_date, to_date, tag):
     # Call the api
     new_posts = []
     results = api.feed_tag(tag)
@@ -65,11 +65,11 @@ def get_new_posts(api, last_runtime, tag):
             # retrieve post data
             media_type, date, username, img_url, id = extract_post_data(post)
             # if the post is more recent than the last time we checked
-            if (img_url and date > last_runtime):
+            if (img_url and date > from_date and date < to_date):
                 new_posts.append(post)
                 # print("%s - %s - %s \n%s" % (id, date, username, img_url))
             # else break
-            elif date < last_runtime:
+            elif date < from_date:
                 loop = False
 
         next_max_id = results.get('next_max_id')

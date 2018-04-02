@@ -4,11 +4,16 @@ import cv2
 import os
 import logging
 import argparse
-from time import time, sleep
+from time import time, sleep, strptime
 from datetime import datetime, date
 from dateutil import relativedelta
 from urllib import request
 
+
+def string_to_date(date_str):
+    date = strptime(date_str, "%Y-%m-%d")
+    date = datetime(*date[:6])
+    return date
 
 def load_last_date():
     last_runtime = open("instagram/last_runtime.txt", "r")
@@ -32,28 +37,32 @@ def main(args):
     test_run = False
 
     # Login
+    print('\n--------------------')
+    print('[IG - LOGIN] %s %s' % (args.username, args.password))
+    print('--------------------')
     api = login(args)
 
-    # Load the last known runtime
-    if (args.force_runtime):
-        last_runtime = datetime.now() - relativedelta.relativedelta(months=int(args.force_runtime))
-    else:
-        last_runtime = load_last_date()
-        if not last_runtime:
-            save_last_runtime(time())
-            last_runtime = time()
+    # If a last runtime does not exist create it
+    if not load_last_date():
+        save_last_runtime(time())
+    # Set the date interval for the IG search
+    from_date = string_to_date(args.from_timestamp) if args.from_timestamp else load_last_date()
+    to_date = string_to_date(args.to_timestamp) if args.to_timestamp else datetime.now()
 
     # Set default directories for images
     img_path_in = os.path.join(os.getcwd(), 'images', 'in')
     img_path_out = os.path.join(os.getcwd(), 'images', 'out')
-    # Clean their content
+    # Clean their contents
     tmp = [os.remove(os.path.join(img_path_in, f)) for f in os.listdir(img_path_in) if f.endswith("jpg")]
     tmp = [os.remove(os.path.join(img_path_out, f)) for f in os.listdir(img_path_out) if f.endswith("jpg")]
 
     # Get new posts from IG
+    print('\n--------------------')
+    print("[IG - GET POSTS] #%s from %s to %s" % (tag, from_date.strftime("%Y-%m-%d"), to_date.strftime("%Y-%m-%d")))
+    print('--------------------')
+    posts_data = [extract_post_data(post) for post in get_new_posts(api, from_date, to_date, tag)]
+    # Parse and save new images
     img_filenames = []
-    posts_data = [extract_post_data(post) for post in get_new_posts(api, last_runtime, tag)]
-    # Parse and save all new images
     for d in posts_data:
         request.urlretrieve(d.img_url, os.path.join(img_path_in, "%s.jpg" % d.id))
         print("%s - %s \nSaved as %s.jpg" % (d.date, d.username, d.id))
@@ -61,9 +70,15 @@ def main(args):
         sleep(.5)
 
     # Predict, process and save all photos containing Monalisa
+    print('\n--------------------')
+    print("[YOLO - PREDICTING]")
+    print('--------------------')
     predict(config_path, weights_path, img_filenames, img_path_in, img_path_out)
 
     # Post the resulting images
+    print('\n--------------------')
+    print('[IG - POST NEW PHOTOS] %s %s' % (args.username, args.password))
+    print('--------------------')
     for d in posts_data:
         fp = os.path.join(img_path_out, "%s.jpg" % d.id)
         if os.path.isfile(fp):
@@ -77,7 +92,7 @@ def main(args):
                 print('%s %s %s \n%s posted on Instagram' % (d.id, d.username, caption, fp))
                 if not test_run:
                     post_photos(api, img_str, (w,h), caption)
-                    sleep(10)
+                    sleep(20)
 
     # Save the runtime
     save_last_runtime(time())
@@ -95,7 +110,10 @@ if __name__ == '__main__':
     parser.add_argument('-settings', '--settings', dest='settings_file_path', type=str, required=True)
     parser.add_argument('-u', '--username', dest='username', type=str, required=True)
     parser.add_argument('-p', '--password', dest='password', type=str, required=True)
-    parser.add_argument('-fr', '--force-runtime', dest='force_runtime', type=str, required=False)    
+    parser.add_argument('-f', '--from_timestamp', dest='from_timestamp', 
+                        type=str, required=False, metavar="(YYYY-MM-DD)")
+    parser.add_argument('-t', '--to_timestamp', dest='to_timestamp', 
+                        type=str, required=False, metavar="(YYYY-MM-DD)")
     parser.add_argument('-debug', '--debug', action='store_true')
 
     args = parser.parse_args()

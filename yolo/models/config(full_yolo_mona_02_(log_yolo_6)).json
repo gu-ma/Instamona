@@ -1,0 +1,36 @@
+{
+    "model" : {
+        "architecture":         "Full Yolo",
+        "input_size":           416,
+        "anchors":              [1.03,1.63, 1.94,2.75, 2.59,4.62, 4.69,8.14, 8.48,10.13],
+        "max_box_per_image":    10,        
+        "labels":               ["mona"]
+    },
+
+    "train": {
+        "train_image_folder":   "images/train/",
+        "train_annot_folder":   "annotations/train/",     
+          
+        "train_times":          20,
+        "pretrained_weights":   "weights/full_yolo_raccoon.h5",
+        "batch_size":           6,
+        "learning_rate":        1e-4,
+        "nb_epochs":            50,
+        "warmup_epochs":        0,
+
+        "object_scale":         5.0 ,
+        "no_object_scale":      1.0,
+        "coord_scale":          1.0,
+        "class_scale":          1.0,
+
+        "saved_weights_name":   "weights/full_yolo_mona_02.h5",
+        "debug":                true
+    },
+
+    "valid": {
+        "valid_image_folder":   "images/valid/",
+        "valid_annot_folder":   "annotations/valid/",
+
+        "valid_times":          1
+    }
+}
