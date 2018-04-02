@@ -43,7 +43,7 @@ See requirements from:
 
 NB: Most of the frontend code for predicting MonaLisa's location is taken from [Basic Yolo Keras](https://github.com/experiencor/basic-yolo-keras).
 
-## Possible improvments
+## Possible improvements
 - [ ] Handle instagram videos
 - [ ] Add weights_path, config_path, tag, simulate (run the program without posting on IG), simulated runtime, blur_type and blur_amount as args
 - [ ] Add comments + simple doc :pencil:
