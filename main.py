@@ -32,9 +32,9 @@ def main(args):
  
     # Define variables 
     config_path = 'yolo/config.json'
-    weights_path = 'yolo/full_yolo_mona_03.h5'
+    weights_path = 'yolo/full_yolo_mona_05.h5'
     tag = 'monalisaselfie'
-    test_run = False
+    test_run = True
 
     # Login
     print('\n--------------------')
@@ -89,9 +89,10 @@ def main(args):
                 img_str = cv2.imencode('.jpg', img)[1].tostring()
                 # tag user and add hashtag
                 caption = '@%s #%s' % (d.username, tag)
-                print('%s %s %s \n%s posted on Instagram' % (d.id, d.username, caption, fp))
+                print('%s %s %s' % (d.id, d.username, caption))
                 if not test_run:
                     post_photos(api, img_str, (w,h), caption)
+                    print('%s posted on Instagram' % fp)
                     sleep(20)
 
     # Save the runtime
