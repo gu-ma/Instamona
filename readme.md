@@ -4,7 +4,7 @@
 
 Object detection on Instagram using Keras and Yolo.
 
-> ![Mona Lova](https://raw.githubusercontent.com/gu-ma/Instamona/master/images/example.jpg)
+> ![Mona Lova](https://raw.githubusercontent.com/gu-ma/Instamona/master/images/example.jpg)<br>
 > <a href="https://www.instagram.com/p/BhDIvrrFp7e/" target="_blank">A post shared by Mona Lova (@m.o.n.a.l.o.v.a)</a> on Apr 1, 2018 at 6:06pm PDT
 
 1) Search instagram for posts tagged _#Monalisaselfies_ <br>
