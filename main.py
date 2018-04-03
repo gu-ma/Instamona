@@ -77,7 +77,7 @@ def main(args):
 
     # Post the resulting images
     print('\n--------------------')
-    print('[IG - POST NEW PHOTOS] %s %s' % (args.username, args.password))
+    print('[IG - POST NEW PHOTOS] \n%s %s' % (args.username, args.password))
     print('--------------------')
     for d in posts_data:
         fp = os.path.join(img_path_out, "%s.jpg" % d.id)

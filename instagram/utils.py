@@ -70,6 +70,7 @@ def get_new_posts(api, from_date, to_date, tag):
                 # print("%s - %s - %s \n%s" % (id, date, username, img_url))
             # else if it's older than the from date
             # This doesn't work properly <--
+            # print(date)
             if date < from_date:
                 loop = False
 
