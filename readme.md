@@ -4,7 +4,7 @@
 
 Object detection on Instagram using Keras and Yolo. 
 
-```python main.py -u "ig_usernamea" -p "ig_password" -settings "instagram/credentials.json" -f yyyy-mm-dd -t yyyy-mm-dd```
+```python main.py -u "ig_username" -p "ig_password" -settings "instagram/credentials.json" -f yyyy-mm-dd -t yyyy-mm-dd```
 
 NB: the function to search time interval does not work properly, sometimes there are unsorted dates in the list returned by ```Instagram Private API```
 
