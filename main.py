@@ -60,7 +60,7 @@ def main(args):
     print('\n--------------------')
     print("[IG - GET POSTS] \n#%s \nfrom %s to %s" % (tag, from_date.strftime("%Y-%m-%d"), to_date.strftime("%Y-%m-%d")))
     print('--------------------')
-    posts_data = [extract_post_data(post) for post in get_new_posts(api, from_date, to_date, tag)]
+    posts_data = [extract_post_data(post) for post in get_new_posts(api, from_date, to_date, tag, args.username)]
     # Parse and save new images
     img_filenames = []
     for d in posts_data:

@@ -49,7 +49,7 @@ def extract_post_data(post):
     Post = namedtuple('Post', ['media_type', 'date', 'username', 'img_url', 'id'])
     return Post(mt, dt, usr, url, id)
 
-def get_new_posts(api, from_date, to_date, tag):
+def get_new_posts(api, from_date, to_date, tag, username):
     # Call the api
     new_posts = []
     results = api.feed_tag(tag)
@@ -65,9 +65,9 @@ def get_new_posts(api, from_date, to_date, tag):
         # iterate throught the results
         for post in posts:
             # retrieve post data
-            media_type, date, username, img_url, id = extract_post_data(post)
+            media_type, date, usrnm, img_url, id = extract_post_data(post)
             # if the post is within the dates range
-            if (img_url and date > from_date and date < to_date):
+            if (img_url and date > from_date and date < to_date and usrnm != username):
                 new_posts.append(post)
                 # print("%s - %s - %s \n%s" % (id, date, username, img_url))
             # else if it's older than the from date
