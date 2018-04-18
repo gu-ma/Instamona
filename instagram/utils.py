@@ -54,6 +54,8 @@ def get_new_posts(api, from_date, to_date, tag):
     new_posts = []
     results = api.feed_tag(tag)
     loop = True
+    date_flags = 0
+    date_flags_thresold = 4
     assert len(results.get('items', [])) > 0
 
     while loop:
@@ -64,7 +66,7 @@ def get_new_posts(api, from_date, to_date, tag):
         for post in posts:
             # retrieve post data
             media_type, date, username, img_url, id = extract_post_data(post)
-            # if the post is more within the dates
+            # if the post is within the dates range
             if (img_url and date > from_date and date < to_date):
                 new_posts.append(post)
                 # print("%s - %s - %s \n%s" % (id, date, username, img_url))
@@ -72,6 +74,9 @@ def get_new_posts(api, from_date, to_date, tag):
             # This doesn't work properly <--
             # print(date)
             if date < from_date:
+                date_flags += 1
+
+            if date_flags > date_flags_thresold:
                 loop = False
 
         next_max_id = results.get('next_max_id')
