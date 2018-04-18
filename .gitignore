@@ -1,6 +1,8 @@
 # Models
 *.h5
+
 /instagram/credentials.json
+*.pyc
 
 # Folders
 **/__pycache__
