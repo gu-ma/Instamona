@@ -77,7 +77,7 @@ def main(args):
 
     # Post the resulting images
     print('\n--------------------')
-    print('[IG - POST NEW PHOTOS] \n%s %s' % (args.username, args.password))
+    print('[IG - POST NEW PHOTOS] \nusr:%s \npwd:%s' % (args.username, args.password))
     print('--------------------')
     for d in posts_data:
         fp = os.path.join(img_path_out, "%s.jpg" % d.id)
@@ -96,7 +96,8 @@ def main(args):
                     sleep(20)
 
     # Save the runtime
-    save_last_runtime(time())
+    if not test_run:
+        save_last_runtime(time())
 
 if __name__ == '__main__':
 
@@ -106,7 +107,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.WARNING)
 
     # Example command:
-    # python main.py -u "yyy" -p "zzz" -settings "test_credentials.json"
+    # python main.py -u "ig_username" -p "ig_password" -settings "instagram/credentials.json" -f yyyy-mm-dd -t yyyy-mm-dd
     parser = argparse.ArgumentParser(description='main routine')
     parser.add_argument('-settings', '--settings', dest='settings_file_path', type=str, required=True)
     parser.add_argument('-u', '--username', dest='username', type=str, required=True)
