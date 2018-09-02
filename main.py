@@ -34,7 +34,6 @@ def main(args):
     config_path = 'yolo/config.json'
     weights_path = 'yolo/full_yolo_mona_03.h5'
     tag = 'monalisaselfie'
-    test_run = True
 
     # Login
     print('\n--------------------')
@@ -90,13 +89,13 @@ def main(args):
                 # tag user and add hashtag
                 caption = '@%s #%s' % (d.username, tag)
                 print('%s %s %s' % (d.id, d.username, caption))
-                if not test_run:
+                if not args.test:
                     post_photos(api, img_str, (w,h), caption)
                     print('%s posted on Instagram' % fp)
                     sleep(20)
 
     # Save the runtime
-    if not test_run:
+    if not args.test:
         save_last_runtime(time())
 
 if __name__ == '__main__':
@@ -112,11 +111,10 @@ if __name__ == '__main__':
     parser.add_argument('-settings', '--settings', dest='settings_file_path', type=str, required=True)
     parser.add_argument('-u', '--username', dest='username', type=str, required=True)
     parser.add_argument('-p', '--password', dest='password', type=str, required=True)
-    parser.add_argument('-f', '--from_timestamp', dest='from_timestamp', 
-                        type=str, required=False, metavar="(YYYY-MM-DD)")
-    parser.add_argument('-t', '--to_timestamp', dest='to_timestamp', 
-                        type=str, required=False, metavar="(YYYY-MM-DD)")
+    parser.add_argument('-f', '--from_timestamp', dest='from_timestamp', type=str, required=False, metavar="(YYYY-MM-DD)")
+    parser.add_argument('-t', '--to_timestamp', dest='to_timestamp', type=str, required=False, metavar="(YYYY-MM-DD)")
     parser.add_argument('-debug', '--debug', action='store_true')
+    parser.add_argument('-tst', '--test', action='store_true')
 
     args = parser.parse_args()
     if args.debug:
