@@ -9,7 +9,6 @@ from datetime import datetime, date
 from dateutil import relativedelta
 from urllib import request
 
-
 def string_to_date(date_str):
     date = strptime(date_str, "%Y-%m-%d")
     date = datetime(*date[:6])
@@ -61,25 +60,27 @@ def main(args):
     print('--------------------')
     posts_data = [extract_post_data(post) for post in get_new_posts(api, from_date, to_date, tag, args.username)]
     # Parse and save new images
-    img_filenames = []
-    for d in posts_data:
-        request.urlretrieve(d.img_url, os.path.join(img_path_in, "%s.jpg" % d.id))
-        print("%s - %s \nSaved as %s.jpg" % (d.date, d.username, d.id))
-        img_filenames.append("%s.jpg" % d.id)
+    filenames = []
+    for p in posts_data:
+        ext = 'jpg' if '.jpg' in p.media_url else p.media_url.split('.')[-1];
+        filename = p.id + '.' + ext
+        request.urlretrieve(p.media_url, os.path.join(img_path_in, filename))
+        print("%s - %s \nSaved as %s" % (p.date, p.username, filename))
+        filenames.append(filename)
         sleep(.5)
 
     # Predict, process and save all photos containing Monalisa
     print('\n--------------------')
     print("[YOLO - PREDICTING]")
     print('--------------------')
-    predict(config_path, weights_path, img_filenames, img_path_in, img_path_out)
+    predict(config_path, weights_path, filenames, img_path_in, img_path_out)
 
     # Post the resulting images
     print('\n--------------------')
     print('[IG - POST NEW PHOTOS] \nusr:%s \npwd:%s' % (args.username, args.password))
     print('--------------------')
-    for d in posts_data:
-        fp = os.path.join(img_path_out, "%s.jpg" % d.id)
+    for p in posts_data:
+        fp = os.path.join(img_path_out, "%s.jpg" % p.id)
         if os.path.isfile(fp):
             img = cv2.imread(fp)
             if img is not None:
@@ -87,8 +88,8 @@ def main(args):
                 h = img.shape[0]
                 img_str = cv2.imencode('.jpg', img)[1].tostring()
                 # tag user and add hashtag
-                caption = '@%s #%s' % (d.username, tag)
-                print('%s %s %s' % (d.id, d.username, caption))
+                caption = '@%s #%s' % (p.username, tag)
+                print('%s %s %s' % (p.id, p.username, caption))
                 if not args.test:
                     post_photos(api, img_str, (w,h), caption)
                     print('%s posted on Instagram' % fp)
@@ -113,8 +114,9 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--password', dest='password', type=str, required=True)
     parser.add_argument('-f', '--from_timestamp', dest='from_timestamp', type=str, required=False, metavar="(YYYY-MM-DD)")
     parser.add_argument('-t', '--to_timestamp', dest='to_timestamp', type=str, required=False, metavar="(YYYY-MM-DD)")
-    parser.add_argument('-debug', '--debug', action='store_true')
+    parser.add_argument('-dbg', '--debug', dest='debug', action='store_true')
     parser.add_argument('-tst', '--test', action='store_true')
+    parser.add_argument('-mt', '--media_type', dest='media_type', type=str, help='media_type: 1=image, 2=Video, 8=Album')
 
     args = parser.parse_args()
     if args.debug:

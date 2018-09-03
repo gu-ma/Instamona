@@ -29,7 +29,7 @@ argparser.add_argument(
     '--input',
     help='path to an image or an video (mp4 format)')
 
-def predict(config_path, weights_path, img_filenames, path_in, path_out):
+def predict(config_path, weights_path, filenames, path_in, path_out):
  
     with open(config_path) as config_buffer:    
         config = json.load(config_buffer)
@@ -55,50 +55,51 @@ def predict(config_path, weights_path, img_filenames, path_in, path_out):
     #   Predict bounding boxes 
     ###############################
 
-    for img_filename in img_filenames:
+    for filename in filenames:
 
-        img = cv2.imread(os.path.join(path_in, img_filename))
-        boxes = yolo.predict(img)
-        print(img_filename +': ' + str(len(boxes)) + ' boxes found')
-        if len(boxes) > 0:
-            # good settings for cv2.INTER_CUBIC
-            # img = draw_boxes(img, boxes, config['model']['labels'], 'pixelate', .04, .5)
-            # good settings for cv2.INTER_LINEAR
-            img = draw_boxes(img, boxes, config['model']['labels'], 'pixelate', .025, .5)
-            # Save 
-            cv2.imwrite(os.path.join(path_out, img_filename), img)
+        fp_in = os.path.join(path_in, filename)
+        fp_out = os.path.join(path_out, filename)
 
-    # if image_path[-4:] == '.mp4':
-    #     video_out = image_path[:-4] + '_detected' + image_path[-4:]
+        if fp_in[-4:] == '.mp4':
 
-    #     video_reader = cv2.VideoCapture(image_path)
+            video_reader = cv2.VideoCapture(fp_in)
 
-    #     nb_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
-    #     frame_h = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    #     frame_w = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
+            nb_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
+            frame_h = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            frame_w = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
+            fps = int(video_reader.get(cv2.CAP_PROP_FPS))
 
-    #     video_writer = cv2.VideoWriter(video_out,
-    #                            cv2.VideoWriter_fourcc(*'MPEG'), 
-    #                            50.0, 
-    #                            (frame_w, frame_h))
+            video_writer = cv2.VideoWriter(fp_out,
+                                   cv2.VideoWriter_fourcc(*'MPEG'), 
+                                   fps, 
+                                   (frame_w, frame_h))
+            boxes_count = 0
+            for i in tqdm(range(nb_frames)):
+                _, image = video_reader.read()
+                
+                boxes = yolo.predict(image)
+                boxes_count += len(boxes)
+                # image = draw_boxes(image, boxes, config['model']['labels'])
+                image = draw_boxes(image, boxes, config['model']['labels'], 'pixelate', .025, .5)
+                video_writer.write(np.uint8(image))
 
-    #     for i in tqdm(range(nb_frames)):
-    #         _, image = video_reader.read()
-            
-    #         boxes = yolo.predict(image)
-    #         # image = draw_boxes(image, boxes, config['model']['labels'])
-    #         image = draw_checker(image, boxes, config['model']['labels'],10)
+            acc = boxes_count/nb_frames
+            print('%d average accuracy (boxes found per frame)' % acc )
 
-    #         video_writer.write(np.uint8(image))
+            if (acc < .5):
+                os.remove(path_out)
 
-    #     video_reader.release()
-    #     video_writer.release()  
-    # else:
-    #     image = cv2.imread(image_path)
-    #     boxes = yolo.predict(image)
-    #     # image = draw_boxes(image, boxes, config['model']['labels'])
-    #     image = draw_checker(image, boxes, config['model']['labels'],10)
+            video_reader.release()
+            video_writer.release() 
 
-    #     print(len(boxes), 'boxes are found')
-
-    #     cv2.imwrite(image_path[:-4] + '_detected' + image_path[-4:], image)
+        else:
+            image = cv2.imread(fp_in)
+            boxes = yolo.predict(image)
+            if len(boxes) > 0:
+                print('%s: %d boxes found ' % (filename, len(boxes)) )
+                # good settings for cv2.INTER_CUBIC
+                # img = draw_boxes(img, boxes, config['model']['labels'], 'pixelate', .04, .5)
+                # good settings for cv2.INTER_LINEAR
+                image = draw_boxes(image, boxes, config['model']['labels'], 'pixelate', .025, .5)
+                # Save 
+                cv2.imwrite(fp_out, image)

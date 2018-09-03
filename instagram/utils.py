@@ -43,10 +43,14 @@ def extract_post_data(post):
     # dt = datetime.datetime.fromtimestamp(post['taken_at']).strftime('%Y-%m-%d %H:%M:%S')
     dt = datetime.datetime.utcfromtimestamp(post['taken_at'])
     usr = post['user']['username']
-    # if media_type == 1 it's a single image
-    url = post['image_versions2']['candidates'][0]['url'] if mt == 1 else ''
+    # media_type: 1=image, 2=Video, 8=Album
+    url = ''
+    if mt == 1:
+        url = post['image_versions2']['candidates'][0]['url']
+    elif mt == 2:
+        url = post['video_versions'][0]['url']
     id = post['id']
-    Post = namedtuple('Post', ['media_type', 'date', 'username', 'img_url', 'id'])
+    Post = namedtuple('Post', ['media_type', 'date', 'username', 'media_url', 'id'])
     return Post(mt, dt, usr, url, id)
 
 def get_new_posts(api, from_date, to_date, tag, username):
@@ -65,17 +69,13 @@ def get_new_posts(api, from_date, to_date, tag, username):
         # iterate throught the results
         for post in posts:
             # retrieve post data
-            media_type, date, usrnm, img_url, id = extract_post_data(post)
-            # if the post is within the dates range
-            if (img_url and date > from_date and date < to_date and usrnm != username):
+            mt, dt, usr, url, id = extract_post_data(post)
+            # if the post is within the date range
+            if (url and dt > from_date and dt < to_date and usr != username):
                 new_posts.append(post)
-                # print("%s - %s - %s \n%s" % (id, date, username, img_url))
-            # else if it's older than the from date
-            # This doesn't work properly <--
-            # print(date)
-            if date < from_date:
+            # Flag wrong dates
+            if dt < from_date:
                 date_flags += 1
-
             if date_flags > date_flags_thresold:
                 loop = False
 
