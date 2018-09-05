@@ -4,16 +4,19 @@ import json
 import codecs
 import datetime
 import os.path
+
+from instagram_private_api_extensions import media
+
 try:
     from instagram_private_api import (
-        Client, ClientError, ClientLoginError,
-        ClientCookieExpiredError, ClientLoginRequiredError,
+        Client, ClientError, ClientLoginError, MediaRatios,
+        ClientCookieExpiredError, ClientLoginRequiredError, 
         __version__ as client_version)
 except ImportError:
     import sys
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from instagram_private_api import (
-        Client, ClientError, ClientLoginError,
+        Client, ClientError, ClientLoginError, MediaRatios,
         ClientCookieExpiredError, ClientLoginRequiredError,
         __version__ as client_version)
 
@@ -54,10 +57,12 @@ def extract_post_data(post):
     Post = namedtuple('Post', ['media_type', 'date', 'username', 'image_url', 'video_url', 'id'])
     return Post(mt, dt, usr, iurl, vurl, id)
 
+
 def get_new_posts(api, from_date, to_date, tag, username, media_type):
     # Call the api
     new_posts = []
-    results = api.feed_tag(tag)
+    uuid = Client.generate_uuid()
+    results = api.feed_tag(tag, uuid)
     loop = True
     date_flags = 0
     date_flags_thresold = 4
@@ -81,16 +86,20 @@ def get_new_posts(api, from_date, to_date, tag, username, media_type):
                 loop = False
 
         next_max_id = results.get('next_max_id')
-        results = api.feed_tag(tag, max_id = next_max_id)
+        results = api.feed_tag(tag, uuid, max_id = next_max_id)
         assert len(results.get('items', [])) > 0
 
     return new_posts
 
-def post_photo(api, photo_data, size, caption):
-    api.post_photo(photo_data, size, caption)
 
-def post_video(api, video, size, duration, thumb_data, caption):
-    api.post_video(video, size, duration, thumb_data, caption)
+def post_photo(api, filepath, caption):
+    data, size = media.prepare_image(filepath, aspect_ratios=MediaRatios.standard)
+    api.post_photo(data, size, caption)
+
+
+def post_video(api, filepath, thumb_data, caption):
+    data, size, duration, thumb = media.prepare_video(filepath, aspect_ratios=MediaRatios.reel, skip_reencoding=True, save_path='8_modified.mp4')
+    api.post_video_story(data, size, duration, thumb)
 
 
 def login(args):

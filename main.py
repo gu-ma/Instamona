@@ -3,6 +3,7 @@ from instagram.utils import get_new_posts
 from instagram.utils import extract_post_data
 from instagram.utils import post_photo
 from instagram.utils import post_video
+
 from predict import predict
 import cv2
 import os
@@ -110,34 +111,33 @@ def main(args):
 
             if ext == '.jpg' and not '_thumb' in path:
 
-                img = cv2.imread(path)
-                w = img.shape[1]
-                h = img.shape[0]
-                img_str = cv2.imencode('.jpg', img)[1].tostring()
+                # img = cv2.imread(path)
+                # w = img.shape[1]
+                # h = img.shape[0]
+                # img_str = cv2.imencode('.jpg', img)[1].tostring()
                 
                 if args.media_type == 0 or args.media_type == 1:
                     if not args.test:
-                        post_photo(api, img_str, (w,h), caption)
+                        post_photo(api, path, caption)
                         print('%s posted on Instagram' % path)
                         sleep(10)
 
             if ext == '.mp4':
 
-                video_reader = cv2.VideoCapture(path)
-                nb_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
-                w = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
-                h = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                fps = int(video_reader.get(cv2.CAP_PROP_FPS))
-                duration = nb_frames/fps
+                # video_reader = cv2.VideoCapture(path)
+                # nb_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
+                # w = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
+                # h = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                # fps = int(video_reader.get(cv2.CAP_PROP_FPS))
+                # duration = nb_frames/fps
+                # video_file = open(path, 'r')
 
-                video_file = open(path, 'r')
-                print(basename + '_thumb.jpg')
                 thumb = cv2.imread(basename + '_thumb.jpg')
-                thumb_str = cv2.imencode('.jpg', thumb)[1].tostring()
+                thumb_data = cv2.imencode('.jpg', thumb)[1].tostring()
 
                 if args.media_type == 0 or args.media_type == 2:
                     if not args.test:
-                        post_video(api, video_file, (w, h), duration, thumb_str, caption)
+                        post_video(api, path, thumb_data, caption)
                         print('%s posted on Instagram' % path)
                         sleep(10)
 
