@@ -1,4 +1,8 @@
-from instagram.utils import login, get_new_posts, extract_post_data, post_photos
+from instagram.utils import login
+from instagram.utils import get_new_posts
+from instagram.utils import extract_post_data
+from instagram.utils import post_photo
+from instagram.utils import post_video
 from predict import predict
 import cv2
 import os
@@ -9,7 +13,7 @@ from datetime import datetime, date
 from dateutil import relativedelta
 from urllib import request
 
-def string_to_date(date_str):
+def str_to_dt(date_str):
     date = strptime(date_str, "%Y-%m-%d")
     date = datetime(*date[:6])
     return date
@@ -35,7 +39,7 @@ def main(args):
     tag = 'monalisaselfie'
 
     # Login
-    print('\n--------------------')
+    print('--------------------')
     print('[IG - LOGIN] \nusr:%s \npwd:%s' % (args.username, args.password))
     print('--------------------')
     api = login(args)
@@ -44,56 +48,98 @@ def main(args):
     if not load_last_date():
         save_last_runtime(time())
     # Set the date interval for the IG search
-    from_date = string_to_date(args.from_timestamp) if args.from_timestamp else load_last_date()
-    to_date = string_to_date(args.to_timestamp) if args.to_timestamp else datetime.now()
+    from_date = str_to_dt(args.from_time) if args.from_time else load_last_date()
+    to_date = str_to_dt(args.to_time) if args.to_time else datetime.now()
 
     # Set default directories for images
-    img_path_in = os.path.join(os.getcwd(), 'images', 'in')
-    img_path_out = os.path.join(os.getcwd(), 'images', 'out')
+    path_in = os.path.join(os.getcwd(), 'media', 'in')
+    path_out = os.path.join(os.getcwd(), 'media', 'out')
     # Clean their contents
-    tmp = [os.remove(os.path.join(img_path_in, f)) for f in os.listdir(img_path_in) if f.endswith("jpg")]
-    tmp = [os.remove(os.path.join(img_path_out, f)) for f in os.listdir(img_path_out) if f.endswith("jpg")]
+    tmp = [os.remove(os.path.join(path_in, f)) for f in os.listdir(path_in)]
+    # tmp = [os.remove(os.path.join(path_out, f)) for f in os.listdir(path_out)]
 
     # Get new posts from IG
-    print('\n--------------------')
-    print("[IG - GET POSTS] \n#%s \nfrom %s to %s" % (tag, from_date.strftime("%Y-%m-%d"), to_date.strftime("%Y-%m-%d")))
     print('--------------------')
-    posts_data = [extract_post_data(post) for post in get_new_posts(api, from_date, to_date, tag, args.username)]
-    # Parse and save new images
-    filenames = []
-    for p in posts_data:
-        ext = 'jpg' if '.jpg' in p.media_url else p.media_url.split('.')[-1];
-        filename = p.id + '.' + ext
-        request.urlretrieve(p.media_url, os.path.join(img_path_in, filename))
-        print("%s - %s \nSaved as %s" % (p.date, p.username, filename))
-        filenames.append(filename)
-        sleep(.5)
+    print('[IG - GET POSTS] \n#%s' % tag)
+    print('from %s to %s' % (from_date.strftime("%Y-%m-%d"), to_date.strftime("%Y-%m-%d")))
+    print('--------------------')
+    new_posts = get_new_posts(api, from_date, to_date, tag, args.username, args.media_type)
+    posts = [extract_post_data(post) for post in new_posts]
+    
+    # # Parse and save new images / videos
+    # for post in posts:
+        
+    #     thumb_ext = ''
 
-    # Predict, process and save all photos containing Monalisa
-    print('\n--------------------')
-    print("[YOLO - PREDICTING]")
-    print('--------------------')
-    predict(config_path, weights_path, filenames, img_path_in, img_path_out)
+    #     if post.video_url:
+    #         video_fn = post.id + '.mp4'
+    #         request.urlretrieve(post.video_url, os.path.join(path_in, video_fn))
+    #         print("%s - %s \nSaved as %s" % (post.date, post.username, video_fn))
+    #         thumb_ext = '_thumb'
+        
+    #     if post.image_url:
+    #         image_fn = post.id + thumb_ext + '.jpg'
+    #         request.urlretrieve(post.image_url, os.path.join(path_in, image_fn))
+    #         print("%s - %s \nSaved as %s" % (post.date, post.username, image_fn))
+        
+    #     sleep(.5)
+
+    # # Predict, process and save all photos containing Monalisa
+    # print('--------------------')
+    # print("[YOLO - PREDICTING]")
+    # print('--------------------')
+    # files_in = [f for f in os.listdir(path_in)]
+    # predict(config_path, weights_path, files_in, path_in, path_out)
 
     # Post the resulting images
-    print('\n--------------------')
-    print('[IG - POST NEW PHOTOS] \nusr:%s \npwd:%s' % (args.username, args.password))
     print('--------------------')
-    for p in posts_data:
-        fp = os.path.join(img_path_out, "%s.jpg" % p.id)
-        if os.path.isfile(fp):
-            img = cv2.imread(fp)
-            if img is not None:
+    print('[IG - POST NEW PHOTOS]')
+    print('usr:%s \npwd:%s' % (args.username, args.password))
+    print('--------------------')
+    fp_out = [os.path.join(path_out, f) for f in os.listdir(path_out)]
+
+    for post in posts:
+        paths = [fp for fp in fp_out if post.id in fp]
+
+        for path in paths:
+
+            basename, ext = os.path.splitext(path)
+            
+            caption = '@%s #%s' % (post.username, tag)
+            print('%s %s %s' % (post.id, post.username, caption))
+
+            if ext == '.jpg' and not '_thumb' in path:
+
+                img = cv2.imread(path)
                 w = img.shape[1]
                 h = img.shape[0]
                 img_str = cv2.imencode('.jpg', img)[1].tostring()
-                # tag user and add hashtag
-                caption = '@%s #%s' % (p.username, tag)
-                print('%s %s %s' % (p.id, p.username, caption))
-                if not args.test:
-                    post_photos(api, img_str, (w,h), caption)
-                    print('%s posted on Instagram' % fp)
-                    sleep(20)
+                
+                if args.media_type == 0 or args.media_type == 1:
+                    if not args.test:
+                        post_photo(api, img_str, (w,h), caption)
+                        print('%s posted on Instagram' % path)
+                        sleep(10)
+
+            if ext == '.mp4':
+
+                video_reader = cv2.VideoCapture(path)
+                nb_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
+                w = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
+                h = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                fps = int(video_reader.get(cv2.CAP_PROP_FPS))
+                duration = nb_frames/fps
+
+                video_file = open(path, 'r')
+                print(basename + '_thumb.jpg')
+                thumb = cv2.imread(basename + '_thumb.jpg')
+                thumb_str = cv2.imencode('.jpg', thumb)[1].tostring()
+
+                if args.media_type == 0 or args.media_type == 2:
+                    if not args.test:
+                        post_video(api, video_file, (w, h), duration, thumb_str, caption)
+                        print('%s posted on Instagram' % path)
+                        sleep(10)
 
     # Save the runtime
     if not args.test:
@@ -112,11 +158,11 @@ if __name__ == '__main__':
     parser.add_argument('-settings', '--settings', dest='settings_file_path', type=str, required=True)
     parser.add_argument('-u', '--username', dest='username', type=str, required=True)
     parser.add_argument('-p', '--password', dest='password', type=str, required=True)
-    parser.add_argument('-f', '--from_timestamp', dest='from_timestamp', type=str, required=False, metavar="(YYYY-MM-DD)")
-    parser.add_argument('-t', '--to_timestamp', dest='to_timestamp', type=str, required=False, metavar="(YYYY-MM-DD)")
+    parser.add_argument('-f', '--from_time', dest='from_time', type=str, required=False, metavar="(YYYY-MM-DD)")
+    parser.add_argument('-t', '--to_time', dest='to_time', type=str, required=False, metavar="(YYYY-MM-DD)")
     parser.add_argument('-dbg', '--debug', dest='debug', action='store_true')
     parser.add_argument('-tst', '--test', action='store_true')
-    parser.add_argument('-mt', '--media_type', dest='media_type', type=str, help='media_type: 1=image, 2=Video, 8=Album')
+    parser.add_argument('-mt', '--media_type', dest='media_type', type=int, default=0, help='media_type: 1=image, 2=Video, 8=Album, 0=All')
 
     args = parser.parse_args()
     if args.debug:

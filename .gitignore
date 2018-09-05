@@ -6,4 +6,6 @@
 
 # Folders
 **/__pycache__
-/images/test/
+/media/in/
+/media/out/
+/media/test/

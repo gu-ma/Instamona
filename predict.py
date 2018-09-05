@@ -70,7 +70,7 @@ def predict(config_path, weights_path, filenames, path_in, path_out):
             fps = int(video_reader.get(cv2.CAP_PROP_FPS))
 
             video_writer = cv2.VideoWriter(fp_out,
-                                   cv2.VideoWriter_fourcc(*'MPEG'), 
+                                   cv2.VideoWriter_fourcc(*'mp4v'), 
                                    fps, 
                                    (frame_w, frame_h))
             boxes_count = 0
@@ -84,18 +84,19 @@ def predict(config_path, weights_path, filenames, path_in, path_out):
                 video_writer.write(np.uint8(image))
 
             acc = boxes_count/nb_frames
-            print('%d average accuracy (boxes found per frame)' % acc )
+            print('%s average accuracy (boxes found per frame)' % acc )
 
             if (acc < .5):
-                os.remove(path_out)
+                os.remove(fp_out)
 
             video_reader.release()
             video_writer.release() 
 
         else:
+
             image = cv2.imread(fp_in)
             boxes = yolo.predict(image)
-            if len(boxes) > 0:
+            if len(boxes) > 0 or '_thumb' in filename:
                 print('%s: %d boxes found ' % (filename, len(boxes)) )
                 # good settings for cv2.INTER_CUBIC
                 # img = draw_boxes(img, boxes, config['model']['labels'], 'pixelate', .04, .5)

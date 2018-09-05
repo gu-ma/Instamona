@@ -44,16 +44,17 @@ def extract_post_data(post):
     dt = datetime.datetime.utcfromtimestamp(post['taken_at'])
     usr = post['user']['username']
     # media_type: 1=image, 2=Video, 8=Album
-    url = ''
-    if mt == 1:
-        url = post['image_versions2']['candidates'][0]['url']
-    elif mt == 2:
-        url = post['video_versions'][0]['url']
+    vurl = ''
+    iurl = ''
+    if 'video_versions' in post.keys():
+        vurl = post['video_versions'][0]['url'] 
+    if 'image_versions2' in post.keys():
+        iurl = post['image_versions2']['candidates'][0]['url'] 
     id = post['id']
-    Post = namedtuple('Post', ['media_type', 'date', 'username', 'media_url', 'id'])
-    return Post(mt, dt, usr, url, id)
+    Post = namedtuple('Post', ['media_type', 'date', 'username', 'image_url', 'video_url', 'id'])
+    return Post(mt, dt, usr, iurl, vurl, id)
 
-def get_new_posts(api, from_date, to_date, tag, username):
+def get_new_posts(api, from_date, to_date, tag, username, media_type):
     # Call the api
     new_posts = []
     results = api.feed_tag(tag)
@@ -64,16 +65,16 @@ def get_new_posts(api, from_date, to_date, tag, username):
 
     while loop:
         posts = results.get('items', [])
-        # print(json.dumps(results, indent=2, sort_keys=True))
 
         # iterate throught the results
         for post in posts:
             # retrieve post data
-            mt, dt, usr, url, id = extract_post_data(post)
+            mt, dt, usr, iurl, vurl, id = extract_post_data(post)
             # if the post is within the date range
-            if (url and dt > from_date and dt < to_date and usr != username):
-                new_posts.append(post)
-            # Flag wrong dates
+            if (dt > from_date and dt < to_date and usr != username):
+                if mt == media_type or media_type == 0:
+                    new_posts.append(post)
+            # count the wrong dates
             if dt < from_date:
                 date_flags += 1
             if date_flags > date_flags_thresold:
@@ -85,9 +86,11 @@ def get_new_posts(api, from_date, to_date, tag, username):
 
     return new_posts
 
-def post_photos(api, photo_data, size, caption):
-    # 
+def post_photo(api, photo_data, size, caption):
     api.post_photo(photo_data, size, caption)
+
+def post_video(api, video, size, duration, thumb_data, caption):
+    api.post_video(video, size, duration, thumb_data, caption)
 
 
 def login(args):
