@@ -8,7 +8,7 @@ Object detection on Instagram using Keras and Yolo.
 
 NB: the function to search time interval does not work properly, sometimes there are unsorted dates in the list returned by ```Instagram Private API```
 
-> ![Mona Lova](https://raw.githubusercontent.com/gu-ma/Instamona/master/images/example.jpg)<br>
+> ![Mona Lova](https://raw.githubusercontent.com/gu-ma/Instamona/master/media/example.jpg)<br>
 > <a href="https://www.instagram.com/p/BhDIvrrFp7e/" target="_blank">A post shared by Mona Lova (@m.o.n.a.l.o.v.a)</a> on Apr 1, 2018 at 6:06pm PDT
 
 1) Search instagram for posts tagged _#Monalisaselfies_ <br>
