@@ -98,8 +98,8 @@ def post_photo(api, filepath, caption):
 
 
 def post_video(api, filepath, thumb_data, caption):
-    data, size, duration, thumb = media.prepare_video(filepath, aspect_ratios=MediaRatios.reel, skip_reencoding=True, save_path='8_modified.mp4')
-    api.post_video_story(data, size, duration, thumb)
+    data, size, duration, thumb = media.prepare_video(filepath, aspect_ratios=MediaRatios.standard, skip_reencoding=False)
+    api.post_video(data, size, duration, thumb, caption)
 
 
 def login(args):

@@ -29,9 +29,10 @@ argparser.add_argument(
     '--input',
     help='path to an image or an video (mp4 format)')
 
+
 def predict(config_path, weights_path, filenames, path_in, path_out):
- 
-    with open(config_path) as config_buffer:    
+
+    with open(config_path) as config_buffer:
         config = json.load(config_buffer)
 
     ###############################

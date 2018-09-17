@@ -14,10 +14,12 @@ from datetime import datetime, date
 from dateutil import relativedelta
 from urllib import request
 
+
 def str_to_dt(date_str):
     date = strptime(date_str, "%Y-%m-%d")
     date = datetime(*date[:6])
     return date
+
 
 def load_last_date():
     last_runtime = open("instagram/last_runtime.txt", "r")
@@ -26,15 +28,17 @@ def load_last_date():
         timestamp = float(timestamp)
         return datetime.utcfromtimestamp(timestamp)
 
+
 def save_last_runtime(date):
-    last_runtime = open("instagram/last_runtime.txt", "w") 
+    last_runtime = open("instagram/last_runtime.txt", "w")
     file = str(date)
     last_runtime.write(file)
     last_runtime.close()
 
+
 def main(args):
- 
-    # Define variables 
+
+    # Define variables
     config_path = 'yolo/config.json'
     weights_path = 'yolo/full_yolo_mona_03.h5'
     tag = 'monalisaselfie'
@@ -57,7 +61,7 @@ def main(args):
     path_out = os.path.join(os.getcwd(), 'media', 'out')
     # Clean their contents
     tmp = [os.remove(os.path.join(path_in, f)) for f in os.listdir(path_in)]
-    # tmp = [os.remove(os.path.join(path_out, f)) for f in os.listdir(path_out)]
+    tmp = [os.remove(os.path.join(path_out, f)) for f in os.listdir(path_out)]
 
     # Get new posts from IG
     print('--------------------')
@@ -66,31 +70,31 @@ def main(args):
     print('--------------------')
     new_posts = get_new_posts(api, from_date, to_date, tag, args.username, args.media_type)
     posts = [extract_post_data(post) for post in new_posts]
-    
-    # # Parse and save new images / videos
-    # for post in posts:
-        
-    #     thumb_ext = ''
 
-    #     if post.video_url:
-    #         video_fn = post.id + '.mp4'
-    #         request.urlretrieve(post.video_url, os.path.join(path_in, video_fn))
-    #         print("%s - %s \nSaved as %s" % (post.date, post.username, video_fn))
-    #         thumb_ext = '_thumb'
-        
-    #     if post.image_url:
-    #         image_fn = post.id + thumb_ext + '.jpg'
-    #         request.urlretrieve(post.image_url, os.path.join(path_in, image_fn))
-    #         print("%s - %s \nSaved as %s" % (post.date, post.username, image_fn))
-        
-    #     sleep(.5)
+    # Parse and save new images / videos
+    for post in posts:
 
-    # # Predict, process and save all photos containing Monalisa
-    # print('--------------------')
-    # print("[YOLO - PREDICTING]")
-    # print('--------------------')
-    # files_in = [f for f in os.listdir(path_in)]
-    # predict(config_path, weights_path, files_in, path_in, path_out)
+        thumb_ext = ''
+
+        if post.video_url:
+            video_fn = post.id + '.mp4'
+            request.urlretrieve(post.video_url, os.path.join(path_in, video_fn))
+            print("%s - %s \nSaved as %s" % (post.date, post.username, video_fn))
+            thumb_ext = '_thumb'
+
+        if post.image_url:
+            image_fn = post.id + thumb_ext + '.jpg'
+            request.urlretrieve(post.image_url, os.path.join(path_in, image_fn))
+            print("%s - %s \nSaved as %s" % (post.date, post.username, image_fn))
+
+        sleep(.5)
+
+    # Predict, process and save all photos containing Monalisa
+    print('--------------------')
+    print("[YOLO - PREDICTING]")
+    print('--------------------')
+    files_in = [f for f in os.listdir(path_in)]
+    predict(config_path, weights_path, files_in, path_in, path_out)
 
     # Post the resulting images
     print('--------------------')
@@ -105,17 +109,11 @@ def main(args):
         for path in paths:
 
             basename, ext = os.path.splitext(path)
-            
+
             caption = '@%s #%s' % (post.username, tag)
-            print('%s %s %s' % (post.id, post.username, caption))
 
             if ext == '.jpg' and not '_thumb' in path:
 
-                # img = cv2.imread(path)
-                # w = img.shape[1]
-                # h = img.shape[0]
-                # img_str = cv2.imencode('.jpg', img)[1].tostring()
-                
                 if args.media_type == 0 or args.media_type == 1:
                     if not args.test:
                         post_photo(api, path, caption)
@@ -123,14 +121,6 @@ def main(args):
                         sleep(10)
 
             if ext == '.mp4':
-
-                # video_reader = cv2.VideoCapture(path)
-                # nb_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
-                # w = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
-                # h = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                # fps = int(video_reader.get(cv2.CAP_PROP_FPS))
-                # duration = nb_frames/fps
-                # video_file = open(path, 'r')
 
                 thumb = cv2.imread(basename + '_thumb.jpg')
                 thumb_data = cv2.imencode('.jpg', thumb)[1].tostring()
@@ -144,6 +134,7 @@ def main(args):
     # Save the runtime
     if not args.test:
         save_last_runtime(time())
+
 
 if __name__ == '__main__':
 
