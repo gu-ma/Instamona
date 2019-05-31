@@ -10,8 +10,7 @@ import os
 import logging
 import argparse
 from time import time, sleep, strptime
-from datetime import datetime, date
-from dateutil import relativedelta
+from datetime import datetime
 from urllib import request
 
 

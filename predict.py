@@ -87,7 +87,7 @@ def predict(config_path, weights_path, filenames, path_in, path_out):
             acc = boxes_count/nb_frames
             print('%s average accuracy (boxes found per frame)' % acc )
 
-            if (acc < .5):
+            if (acc < .3):
                 os.remove(fp_out)
 
             video_reader.release()

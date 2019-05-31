@@ -49,7 +49,8 @@ NB: Most of the frontend code for predicting MonaLisa's location is taken from [
 
 ## Possible improvements
 - [x] Fix the from ... to date
-- [ ] Handle instagram videos
-- [ ] Add weights_path, config_path, tag, simulate (run the program without posting on IG), simulated runtime, blur_type and blur_amount as args
+- [x] Handle instagram videos
+- [x] Add simulate argument (run the program without posting on IG)
+- [ ] Add weights_path, config_path, tag, simulated runtime, blur_type and blur_amount as args
 - [ ] Add comments + simple doc :pencil:
 - [ ] Keep a local record of posts (liteSQL)
